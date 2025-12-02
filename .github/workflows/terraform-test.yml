@@ -29,11 +29,7 @@ jobs:
     - name: Terraform Format
       run: terraform fmt -check
 
+    # Validate Terraform files
     - name: Terraform Validate
       run: terraform validate
 
-    - name: Save state
-      run: echo "{name}={value}" >> $GITHUB_STATE
-
-    - name: Set output
-      run: echo "{name}={value}" >> $GITHUB_OUTPUT
