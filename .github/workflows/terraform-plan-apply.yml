@@ -44,3 +44,37 @@ jobs:
       with:
         name: tfplan  
         path: tfplan
+
+  terraform-apply:
+    name: 'Terraform Apply' 
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+    # Checkout the repository to the GitHub Actions runner  
+    - name: Checkout 
+      uses: actions/checkout@v4
+
+    # Login to Azure using the Azure CLI
+    - name: Login via Azure CLI
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: terraform init 
+      
+    # Download the tfplan file from the plan job
+    - name: Download tfplan artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: tfplan
+
+    # Apply the changes required to reach the desired state of the configuration
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
